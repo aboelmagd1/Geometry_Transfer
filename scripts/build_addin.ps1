@@ -5,10 +5,17 @@ $scriptDir = $PSScriptRoot
 $projectRoot = Split-Path -Parent $scriptDir
 $projectDir = Join-Path $projectRoot "GeometryTransferTool"
 $binRelease = Join-Path $projectDir "bin\Release\win-x64"
-$msBuildExe = "C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe"
 
-if (-not (Test-Path $msBuildExe)) {
-    $msBuildExe = "MSBuild.exe"
+# Resolve MSBuild dynamically using vswhere or fallback to PATH
+$vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+$msBuildExe = "MSBuild.exe"
+
+if (Test-Path $vswhere) {
+    $vsPath = & $vswhere -latest -requires Microsoft.Component.MSBuild -property installationPath
+    if ($vsPath) {
+        $candidate = Join-Path $vsPath "MSBuild\Current\Bin\MSBuild.exe"
+        if (Test-Path $candidate) { $msBuildExe = $candidate }
+    }
 }
 
 Write-Host "====================================================" -ForegroundColor Cyan
