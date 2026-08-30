@@ -41,7 +41,7 @@ An **ArcGIS Pro Add-in** for intelligent, conflict-free polygon geometry transfe
 
 ```
 Geometry Transfer/
-├── geometery tools/                           # Pre-compiled ArcGIS Pro Add-in package
+├── Addin_Package/                             # Pre-compiled ArcGIS Pro Add-in package
 │   └── GeometryTransferTool.esriAddInX        # Direct installable Add-in
 │
 ├── GeometryTransferTool/                      # Main C# Project (.NET 8.0 / ArcGIS Pro SDK)
@@ -56,10 +56,6 @@ Geometry Transfer/
 │   ├── Helpers/                               # Spatial utilities, reprojection, logging
 │   └── Images/                                # Add-in and ribbon icons (16x16, 32x32)
 │
-├── scripts/                                   # Automation scripts
-│   ├── build_addin.ps1                        # Compiles solution & packages .esriAddInX
-│   └── install_addin.ps1                      # Deploys .esriAddInX to ArcGIS Pro AddIns folders
-│
 ├── GeometryTransferTool.sln                   # Visual Studio Solution file
 ├── .gitignore                                 # Git ignore configuration
 └── README.md                                  # Documentation
@@ -69,13 +65,8 @@ Geometry Transfer/
 
 ## 🚀 Installation
 
-### Option 1: Direct Double-Click (Recommended)
-Double-click `GeometryTransferTool.esriAddInX` inside the `geometery tools/` folder. The **ESRI ArcGIS Pro Add-In Utility** will install it automatically.
-
-### Option 2: PowerShell Deployment
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install_addin.ps1
-```
+### 1-Click Direct Installation
+Double-click `GeometryTransferTool.esriAddInX` inside the `Addin_Package/` folder. The **ESRI ArcGIS Pro Add-In Utility** will install it automatically.
 
 ---
 
@@ -89,13 +80,7 @@ Once installed, open ArcGIS Pro:
 
 ## 🛠️ Building from Source
 
-### Option 1: PowerShell Build Script
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\build_addin.ps1
-```
-
-### Option 2: Visual Studio
-1. Open `GeometryTransferTool.sln` in Visual Studio 2022.
+1. Open `GeometryTransferTool.sln` in **Visual Studio 2022**.
 2. Select **Release** configuration.
 3. Build the solution (**Ctrl + Shift + B**).
 
