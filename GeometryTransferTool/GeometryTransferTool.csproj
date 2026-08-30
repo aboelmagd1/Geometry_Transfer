@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12.0</LangVersion>
+    <RootNamespace>GeometryTransferTool</RootNamespace>
+    <AssemblyName>GeometryTransferTool</AssemblyName>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Version>2.0.0</Version>
+    <Company>Esri / GIS Solutions</Company>
+    <Product>Geometry Transfer Tool</Product>
+    <Description>ArcGIS Pro Add-in for Smart Polygon Matching and Geometry Transfer</Description>
+  </PropertyGroup>
+
+  <!-- Pro SDK Targets -->
+  <PropertyGroup>
+    <ArcGISProInstallationPath Condition="'$(ArcGISProInstallationPath)' == ''">C:\Program Files\ArcGIS\Pro</ArcGISProInstallationPath>
+    <ProAssemblyPath>$(ArcGISProInstallationPath)\bin</ProAssemblyPath>
+    <ProExtensionsAssemblyPath>$(ArcGISProInstallationPath)\bin\Extensions</ProExtensionsAssemblyPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="ArcGIS.Core">
+      <HintPath>$(ProAssemblyPath)\ArcGIS.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Core">
+      <HintPath>$(ProExtensionsAssemblyPath)\Core\ArcGIS.Desktop.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Framework">
+      <HintPath>$(ProAssemblyPath)\ArcGIS.Desktop.Framework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Mapping">
+      <HintPath>$(ProExtensionsAssemblyPath)\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Editing">
+      <HintPath>$(ProExtensionsAssemblyPath)\Editing\ArcGIS.Desktop.Editing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.GeoProcessing">
+      <HintPath>$(ProExtensionsAssemblyPath)\Geoprocessing\ArcGIS.Desktop.GeoProcessing.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Shared.Wpf">
+      <HintPath>$(ProAssemblyPath)\ArcGIS.Desktop.Shared.Wpf.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Import Project="$(ArcGISProInstallationPath)\bin\Esri.ProApp.SDK.Desktop.targets" Condition="Exists('$(ArcGISProInstallationPath)\bin\Esri.ProApp.SDK.Desktop.targets')" />
+
+  <ItemGroup>
+    <AddInContent Include="Config.daml" />
+    <AddInContent Include="Images\**" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,50 @@
+# ==========================================
+# Visual Studio / .NET / MSBuild
+# ==========================================
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.dbmdl
+*.opendb
+
+# ==========================================
+# ArcGIS Pro Add-in Build & Staging Artifacts
+# ==========================================
+package_staging/
+*.esriAddInX
+*.esriAddInX.zip
+*.log
+geometery tools/
+
+# ==========================================
+# Local Sample Data & Local Scripts
+# ==========================================
+sample_data/
+*.gdb/
+*.lock
+*.sr.lock
+*.ed.lock
+*.rd.lock
+*.bat
+
+# ==========================================
+# Python / ArcPy Artifacts
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# ==========================================
+# OS & System Generated Files
+# ==========================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

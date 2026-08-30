@@ -1,0 +1,46 @@
+<ArcGIS defaultAssembly="GeometryTransferTool.dll" defaultNamespace="GeometryTransferTool" xmlns="http://schemas.esri.com/DADF/Registry" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
+  <AddInInfo id="{8F1E54D7-4B3B-49DF-B3F7-9C9D3A4B5E21}" version="2.0.0" author="Esri / GIS Developer" desktopVersion="3.0">
+    <Name>Geometry Transfer Tool</Name>
+    <Description>ArcGIS Pro Add-in for Smart Polygon Matching and Geometry Transfer with conflict resolution and ambiguity tolerance.</Description>
+    <Image>Images\GeometryTransfer32.png</Image>
+    <Author>GIS Solutions</Author>
+    <Company>Esri GIS Solutions</Company>
+    <Date>2026</Date>
+    <Subject>Editing, Geometry Transfer, Polygon Matching</Subject>
+  </AddInInfo>
+
+  <modules>
+    <insertModule id="GeometryTransferTool_Module" className="Module1" autoLoad="false" caption="Geometry Transfer Module">
+      <!-- Tabs -->
+      <tabs>
+        <tab id="GeometryTransferTool_Tab" caption="Geometry Tools">
+          <group refID="GeometryTransferTool_Group" />
+        </tab>
+      </tabs>
+
+      <!-- Groups -->
+      <groups>
+        <group id="GeometryTransferTool_Group" caption="Transfer" appearsOnAddInTab="false">
+          <button refID="GeometryTransferTool_ShowButton" size="large" />
+        </group>
+      </groups>
+
+      <!-- Controls -->
+      <controls>
+        <button id="GeometryTransferTool_ShowButton" caption="Transfer Geometry" className="GeometryTransferButton" loadOnClick="true" smallImage="Images\GeometryTransfer16.png" largeImage="Images\GeometryTransfer32.png" keytip="TG">
+          <tooltip heading="Transfer Geometry">
+            Transfer geometry from selected local/source polygons to matching selected target polygons based on polygon overlap percentage.
+            <disabledText>Open a map with active polygon feature layers.</disabledText>
+          </tooltip>
+        </button>
+      </controls>
+
+      <!-- DockPanes -->
+      <dockPanes>
+        <dockPane id="GeometryTransferDockPane" caption="Geometry Transfer Tool" className="GeometryTransferDockPaneViewModel" dock="group" dockWith="esri_core_projectDockPane">
+          <content className="GeometryTransferView" />
+        </dockPane>
+      </dockPanes>
+    </insertModule>
+  </modules>
+</ArcGIS>

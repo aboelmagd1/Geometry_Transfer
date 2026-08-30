@@ -1,0 +1,436 @@
+<UserControl x:Class="GeometryTransferTool.GeometryTransferView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:GeometryTransferTool"
+             xmlns:models="clr-namespace:GeometryTransferTool.Models"
+             mc:Ignorable="d" 
+             d:DesignHeight="950" d:DesignWidth="380">
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!-- Boolean to Visibility Converter -->
+            <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+
+            <!-- Explicit High-Contrast Dark-Theme Color Palette -->
+            <SolidColorBrush x:Key="PaneBackground" Color="#1E1E1E" />
+            <SolidColorBrush x:Key="CardBackground" Color="#252526" />
+            <SolidColorBrush x:Key="CardBorder" Color="#3E3E42" />
+            <SolidColorBrush x:Key="InputBackground" Color="#1E1E1E" />
+            <SolidColorBrush x:Key="InputBorder" Color="#555555" />
+            
+            <SolidColorBrush x:Key="TextWhite" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="TextLight" Color="#E2E8F0" />
+            <SolidColorBrush x:Key="TextMuted" Color="#94A3B8" />
+            <SolidColorBrush x:Key="AccentBlue" Color="#38BDF8" />
+            <SolidColorBrush x:Key="PrimaryActionBlue" Color="#0284C7" />
+            <SolidColorBrush x:Key="PrimaryActionHover" Color="#0369A1" />
+            <SolidColorBrush x:Key="SecondaryButtonBg" Color="#334155" />
+            <SolidColorBrush x:Key="SecondaryButtonBorder" Color="#475569" />
+
+            <!-- Core Styles -->
+            <Style x:Key="SectionCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource CardBackground}" />
+                <Setter Property="BorderBrush" Value="{StaticResource CardBorder}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="Padding" Value="10" />
+                <Setter Property="Margin" Value="0,0,0,10" />
+            </Style>
+
+            <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="FontSize" Value="11.5" />
+                <Setter Property="Margin" Value="0,0,0,8" />
+                <Setter Property="Foreground" Value="{StaticResource AccentBlue}" />
+            </Style>
+
+            <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Margin" Value="0,4,0,3" />
+                <Setter Property="Foreground" Value="{StaticResource TextWhite}" />
+            </Style>
+
+            <Style x:Key="SubTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="10" />
+                <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <!-- Global CheckBox Style with explicit high-contrast white text -->
+            <Style TargetType="CheckBox">
+                <Setter Property="Foreground" Value="{StaticResource TextLight}" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="FontWeight" Value="Normal" />
+            </Style>
+
+            <!-- DataGrid Styling for Crystal-Clear Dark Theme Readability -->
+            <Style x:Key="ModernDataGridColumnHeader" TargetType="DataGridColumnHeader">
+                <Setter Property="Background" Value="#334155" />
+                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="Padding" Value="6,4" />
+                <Setter Property="BorderBrush" Value="#475569" />
+                <Setter Property="BorderThickness" Value="0,0,1,1" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+            </Style>
+
+            <Style x:Key="ModernDataGridRow" TargetType="DataGridRow">
+                <Setter Property="Background" Value="#1E1E1E" />
+                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="FontSize" Value="11" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="ToolTip" Value="Click to zoom &amp; highlight on map" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#2D3748" />
+                    </Trigger>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="#0284C7" />
+                        <Setter Property="Foreground" Value="#FFFFFF" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="ModernDataGridCell" TargetType="DataGridCell">
+                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="Padding" Value="4,3" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="#FFFFFF" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="DataGridTextElementStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Padding" Value="4,2" />
+                <Setter Property="FontSize" Value="11" />
+            </Style>
+
+            <!-- Status Badge Template (Optimized for High Visibility) -->
+            <DataTemplate x:Key="StatusCellTemplate" DataType="{x:Type models:MatchResult}">
+                <Border CornerRadius="3" Padding="6,2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="#2A2A2A" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Status}" Value="Transferred">
+                                    <Setter Property="Background" Value="#1B4D2E" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="BelowThreshold">
+                                    <Setter Property="Background" Value="#593400" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="Ambiguous">
+                                    <Setter Property="Background" Value="#541B38" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="TargetAlreadyMatched">
+                                    <Setter Property="Background" Value="#3B1E54" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="Failed">
+                                    <Setter Property="Background" Value="#5C1D1D" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="{Binding StatusDisplay}" FontSize="10.5" FontWeight="SemiBold">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#E0E0E0" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Status}" Value="Transferred">
+                                        <Setter Property="Foreground" Value="#66BB6A" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Status}" Value="BelowThreshold">
+                                        <Setter Property="Foreground" Value="#FFA726" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Status}" Value="Ambiguous">
+                                        <Setter Property="Foreground" Value="#F06292" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Status}" Value="TargetAlreadyMatched">
+                                        <Setter Property="Foreground" Value="#BA68C8" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Status}" Value="Failed">
+                                        <Setter Property="Foreground" Value="#EF5350" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource PaneBackground}" Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header Card -->
+        <Border Grid.Row="0" Style="{StaticResource SectionCardStyle}" Padding="10" Margin="0,0,0,8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Image Grid.Row="0" Grid.Column="0" Source="Images/GeometryTransfer32.png" Width="22" Height="22" Margin="0,0,8,0" VerticalAlignment="Center" />
+                
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="Smart Polygon Transfer" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Foreground="{StaticResource TextWhite}" TextTrimming="CharacterEllipsis" />
+                
+                <Button Grid.Row="0" Grid.Column="2" Command="{Binding RefreshLayersCommand}" ToolTip="Refresh layers and feature selection counts" Background="{StaticResource SecondaryButtonBg}" BorderBrush="{StaticResource SecondaryButtonBorder}" BorderThickness="1" Foreground="{StaticResource TextWhite}" Padding="8,3" Height="26" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="↻ " FontWeight="Bold" Foreground="{StaticResource AccentBlue}" />
+                        <TextBlock Text="Refresh" Foreground="{StaticResource TextWhite}" />
+                    </StackPanel>
+                </Button>
+
+                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="Match local polygon edits to target features by overlap and transfer geometries safely." Style="{StaticResource SubTextStyle}" Margin="0,4,0,0" />
+            </Grid>
+        </Border>
+
+        <!-- Main Scrollable Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,4,0">
+            <StackPanel>
+
+                <!-- 1. Layer Selection Card -->
+                <Border Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="1. LAYER SELECTION (1–60 Features)" Style="{StaticResource SectionHeaderStyle}" />
+
+                        <!-- Source Layer -->
+                        <TextBlock Text="Source / Drawing Layer:" Style="{StaticResource FieldLabelStyle}" />
+                        <ComboBox ItemsSource="{Binding Layers}" SelectedItem="{Binding SelectedSourceLayerItem}" DisplayMemberPath="DisplayText" Height="26" Margin="0,0,0,8" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" />
+
+                        <!-- Target Layer -->
+                        <TextBlock Text="Target / Master Layer:" Style="{StaticResource FieldLabelStyle}" />
+                        <ComboBox ItemsSource="{Binding Layers}" SelectedItem="{Binding SelectedTargetLayerItem}" DisplayMemberPath="DisplayText" Height="26" Margin="0,0,0,4" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" />
+
+                        <TextBlock Text="Select 1 to 60 polygon features in each layer on the map." Style="{StaticResource SubTextStyle}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <!-- 2. Matching Criteria Card -->
+                <Border Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="2. MATCHING CRITERIA" Style="{StaticResource SectionHeaderStyle}" />
+
+                        <!-- Matching Method -->
+                        <TextBlock Text="Matching Method:" Style="{StaticResource FieldLabelStyle}" />
+                        <ComboBox ItemsSource="{Binding MatchingMethods}" SelectedItem="{Binding SelectedMatchingMethod}" Height="25" Margin="0,0,0,8" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" />
+
+                        <!-- Ignore Threshold Checkbox with explicit white text -->
+                        <CheckBox IsChecked="{Binding IgnoreThreshold}" Margin="0,3,0,8">
+                            <TextBlock Text="Ignore threshold (Match any overlap > 0%)" Foreground="{StaticResource TextWhite}" FontWeight="SemiBold" FontSize="11" />
+                        </CheckBox>
+
+                        <!-- Overlap Threshold Slider -->
+                        <StackPanel IsEnabled="{Binding IsThresholdActive}" Margin="0,0,0,8">
+                            <DockPanel Margin="0,0,0,2">
+                                <TextBlock Text="Minimum Overlap Threshold:" Style="{StaticResource FieldLabelStyle}" Margin="0" DockPanel.Dock="Left" />
+                                <TextBlock Text="{Binding OverlapThreshold, StringFormat='{}{0:F0}%'}" FontWeight="Bold" FontSize="11.5" Foreground="{StaticResource AccentBlue}" HorizontalAlignment="Right" />
+                            </DockPanel>
+                            <Slider Minimum="1" Maximum="100" Value="{Binding OverlapThreshold}" TickFrequency="5" IsSnapToTickEnabled="True" Margin="0,2,0,0" />
+                        </StackPanel>
+
+                        <!-- Ambiguity Tolerance -->
+                        <Grid Margin="0,2,0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="65" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="Ambiguity Tolerance (%):" Style="{StaticResource FieldLabelStyle}" Margin="0" />
+                                <TextBlock Text="Flags matches if top overlaps differ by less than this." Style="{StaticResource SubTextStyle}" />
+                            </StackPanel>
+                            <TextBox Grid.Column="1" Text="{Binding AmbiguityTolerance, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:F1}'}" Height="24" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" BorderBrush="{StaticResource InputBorder}" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontWeight="SemiBold" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 3. Optional Attribute Mapping Card -->
+                <Border Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <DockPanel>
+                            <CheckBox IsChecked="{Binding AttributeMappingEnabled}" VerticalAlignment="Center" DockPanel.Dock="Left">
+                                <TextBlock Text="Enable Attribute Mapping" Foreground="{StaticResource TextWhite}" FontWeight="SemiBold" FontSize="11" />
+                            </CheckBox>
+                            <Border Background="#1E3A5F" CornerRadius="3" Padding="5,2" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                                <TextBlock Text="Geometry Only by default" FontSize="9.5" Foreground="#90CAF9" />
+                            </Border>
+                        </DockPanel>
+
+                        <StackPanel Visibility="{Binding AttributeMappingEnabled, Converter={StaticResource BoolToVisConverter}}" Margin="0,8,0,0">
+                            <TextBlock Text="Map source fields to target fields. Unmapped fields remain unchanged." Style="{StaticResource SubTextStyle}" Margin="0,0,0,6" />
+
+                            <DataGrid ItemsSource="{Binding AttributeMappings}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" MaxHeight="140" Margin="0,0,0,6" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" BorderBrush="{StaticResource CardBorder}">
+                                <DataGrid.Columns>
+                                    <DataGridCheckBoxColumn Binding="{Binding IsEnabled}" Header="Active" Width="45" />
+                                    <DataGridTemplateColumn Header="Source Field" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox ItemsSource="{Binding DataContext.AvailableSourceFields, RelativeSource={RelativeSource AncestorType=UserControl}}" SelectedItem="{Binding SourceField, UpdateSourceTrigger=PropertyChanged}" Height="22" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Target Field" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox ItemsSource="{Binding DataContext.AvailableTargetFields, RelativeSource={RelativeSource AncestorType=UserControl}}" SelectedItem="{Binding TargetField, UpdateSourceTrigger=PropertyChanged}" Height="22" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="" Width="30">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="✕" Command="{Binding DataContext.RemoveMappingRowCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Foreground="#EF5350" Background="Transparent" BorderThickness="0" ToolTip="Remove Mapping" FontWeight="Bold" Padding="0" Height="20" Width="20" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <Button Content="+ Add Field Mapping Row" Command="{Binding AddMappingRowCommand}" Background="{StaticResource SecondaryButtonBg}" BorderBrush="{StaticResource SecondaryButtonBorder}" Foreground="{StaticResource TextWhite}" HorizontalAlignment="Left" Padding="8,3" FontSize="11" Height="24" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- 4. Execution Controls Card -->
+                <Border Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="3. EXECUTION CONTROLS" Style="{StaticResource SectionHeaderStyle}" />
+
+                        <CheckBox IsChecked="{Binding SkipPreview}" Margin="0,0,0,8">
+                            <TextBlock Text="Skip preview and transfer immediately" Foreground="{StaticResource TextWhite}" FontSize="11" />
+                        </CheckBox>
+
+                        <Grid Margin="0,2,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" Content="1. Preview Matches" Command="{Binding PreviewMatchesCommand}" Background="{StaticResource SecondaryButtonBg}" BorderBrush="{StaticResource SecondaryButtonBorder}" Foreground="{StaticResource TextWhite}" Height="34" FontWeight="SemiBold" FontSize="11.5" />
+                            <Button Grid.Column="2" Content="2. Confirm &amp; Transfer" Command="{Binding ConfirmTransferCommand}" Background="{StaticResource PrimaryActionBlue}" BorderThickness="0" Foreground="{StaticResource TextWhite}" Height="34" FontWeight="Bold" FontSize="11.5" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 5. Summary KPI Cards -->
+                <Border Visibility="{Binding HasSummary, Converter={StaticResource BoolToVisConverter}}" Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="MATCHING SUMMARY" Style="{StaticResource SectionHeaderStyle}" />
+                        
+                        <UniformGrid Columns="3" Margin="0,0,0,4">
+                            <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Summary.MatchedCount}" FontWeight="Bold" FontSize="17" Foreground="#4CAF50" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Ready / Matched" FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Summary.BelowThresholdCount}" FontWeight="Bold" FontSize="17" Foreground="#FFA726" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Below Thresh." FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Summary.AmbiguousCount}" FontWeight="Bold" FontSize="17" Foreground="#F06292" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Ambiguous" FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+
+                        <UniformGrid Columns="2">
+                            <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Summary.TargetAlreadyMatchedCount}" FontWeight="Bold" FontSize="14" Foreground="#BA68C8" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Conflict (Claimed)" FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Summary.FailedCount}" FontWeight="Bold" FontSize="14" Foreground="#EF5350" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Failed / Errors" FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 6. Detailed Results Table Card (With Zoom & Flash on Selection) -->
+                <Border Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="4. DETAILED RESULTS TABLE" Style="{StaticResource SectionHeaderStyle}" Margin="0" />
+                                <TextBlock Text="Click any row to zoom &amp; highlight feature on map." FontSize="9.5" Foreground="{StaticResource TextMuted}" Margin="0,1,0,0" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="Clear" Command="{Binding ClearResultsCommand}" Background="{StaticResource SecondaryButtonBg}" BorderBrush="{StaticResource SecondaryButtonBorder}" Foreground="{StaticResource TextWhite}" Padding="10,2" Height="22" FontSize="10.5" VerticalAlignment="Center" />
+                        </Grid>
+
+                        <DataGrid ItemsSource="{Binding MatchResults}"
+                                  SelectedItem="{Binding SelectedMatchResult, Mode=TwoWay}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="#3F3F46"
+                                  VerticalGridLinesBrush="#3F3F46"
+                                  Background="#1E1E1E"
+                                  RowBackground="#1E1E1E"
+                                  AlternatingRowBackground="#252526"
+                                  BorderBrush="#3F3F46"
+                                  BorderThickness="1"
+                                  ColumnHeaderStyle="{StaticResource ModernDataGridColumnHeader}"
+                                  RowStyle="{StaticResource ModernDataGridRow}"
+                                  CellStyle="{StaticResource ModernDataGridCell}"
+                                  MinHeight="140" MaxHeight="280"
+                                  SelectionMode="Single"
+                                  SelectionUnit="FullRow">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Source" Binding="{Binding SourceOid}" Width="55" FontWeight="Bold" ElementStyle="{StaticResource DataGridTextElementStyle}" />
+                                <DataGridTextColumn Header="Target" Binding="{Binding TargetOidDisplay}" Width="55" ElementStyle="{StaticResource DataGridTextElementStyle}" />
+                                <DataGridTextColumn Header="Overlap" Binding="{Binding OverlapDisplay}" Width="60" ElementStyle="{StaticResource DataGridTextElementStyle}" />
+                                <DataGridTemplateColumn Header="Status" CellTemplate="{StaticResource StatusCellTemplate}" Width="120" />
+                                <DataGridTextColumn Header="Details / Rationale" Binding="{Binding Details}" Width="*" ElementStyle="{StaticResource DataGridTextElementStyle}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="{StaticResource CardBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="0,1,0,0" Padding="8,5">
+            <DockPanel>
+                <ProgressBar IsIndeterminate="True" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisConverter}}" Width="50" Height="8" Margin="0,0,8,0" DockPanel.Dock="Left" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding StatusMessage}" FontSize="10.5" FontWeight="Medium" Foreground="{StaticResource TextLight}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
