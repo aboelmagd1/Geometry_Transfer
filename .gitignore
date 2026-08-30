@@ -16,10 +16,8 @@
 # ArcGIS Pro Add-in Build & Staging Artifacts
 # ==========================================
 package_staging/
-*.esriAddInX
 *.esriAddInX.zip
 *.log
-geometery tools/
 
 # ==========================================
 # Local Sample Data & Local Scripts
