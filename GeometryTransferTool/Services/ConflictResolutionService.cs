@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ArcGIS.Core.Geometry;
 using GeometryTransferTool.Helpers;
 using GeometryTransferTool.Models;
 
@@ -19,10 +20,18 @@ namespace GeometryTransferTool.Services
             double threshold,
             double ambiguityTolerance,
             HashSet<long>? failedSourceOids = null,
-            bool ignoreThreshold = false)
+            bool ignoreThreshold = false,
+            string? runId = null,
+            string sourceGeometryType = "Polygon",
+            IReadOnlyDictionary<long, Polygon>? workingGeometries = null,
+            IReadOnlyDictionary<long, string>? sourceFailureDetails = null)
         {
             failedSourceOids ??= new HashSet<long>();
             var results = new List<MatchResult>();
+
+            string currentRunId = runId ?? $"GT_{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid().ToString().Substring(0, 4).ToUpperInvariant()}";
+            int matchCounter = 1;
+            bool isPolylineSource = sourceGeometryType.Equals("Polyline", StringComparison.OrdinalIgnoreCase);
 
             // If ignoreThreshold is true, any positive overlap (> 0%) is eligible
             double effectiveThreshold = ignoreThreshold ? 0.0001 : threshold;
@@ -38,7 +47,7 @@ namespace GeometryTransferTool.Services
                 sourceCandidateMap[srcOid] = candidates;
             }
 
-            // Step 1: Detect Ambiguity for each source (§8)
+            // Step 1: Detect Ambiguity for each source (§8, §11)
             var ambiguousSources = new HashSet<long>();
             var ambiguousResults = new Dictionary<long, MatchResult>();
 
@@ -64,12 +73,18 @@ namespace GeometryTransferTool.Services
                             ambiguousSources.Add(srcOid);
                             ambiguousResults[srcOid] = new MatchResult
                             {
+                                MatchId = $"GT-M{matchCounter++:D6}",
+                                RunId = currentRunId,
                                 SourceOid = srcOid,
                                 TargetOidDisplay = $"{top1.TargetOid} / {top2.TargetOid}",
                                 TargetOid = null,
-                                OverlapPercentage = top1.OverlapPercentage,
-                                OverlapDisplay = $"{top1.OverlapPercentage:F1}% / {top2.OverlapPercentage:F1}%",
-                                Status = MatchStatus.Ambiguous,
+                                OverlapPct = top1.OverlapPercentage,
+                                ThresholdPct = threshold,
+                                CandidateCount = candidates.Count,
+                                SecondBestOverlapPct = top2.OverlapPercentage,
+                                MatchStatus = MatchStatus.Ambiguous,
+                                TransferStatus = TransferStatus.NotAttempted,
+                                RunDate = DateTime.Now,
                                 Details = $"Ambiguous match detected (difference of {diff:F2}% <= tolerance of {ambiguityTolerance:F2}%). Manual review required."
                             };
                             Logger.Info($"Ambiguity detected for Source OID {srcOid}: Targets {top1.TargetOid} ({top1.OverlapPercentage}%) and {top2.TargetOid} ({top2.OverlapPercentage}%)");
@@ -108,24 +123,52 @@ namespace GeometryTransferTool.Services
             // Step 3: Classify every source feature
             foreach (var srcOid in sourceOids)
             {
+                var candidates = sourceCandidateMap.TryGetValue(srcOid, out var list) ? list : new List<MatchCandidate>();
+                double? secondBest = candidates.Count >= 2 ? candidates[1].OverlapPercentage : null;
+                Polygon? workingPoly = null;
+                workingGeometries?.TryGetValue(srcOid, out workingPoly);
+
                 if (failedSourceOids.Contains(srcOid))
                 {
+                    string failureDetail = "Source feature contains invalid or empty geometry and was skipped.";
+                    if (sourceFailureDetails != null && sourceFailureDetails.TryGetValue(srcOid, out var customMsg))
+                    {
+                        failureDetail = customMsg;
+                    }
+                    else if (isPolylineSource)
+                    {
+                        failureDetail = "Source polyline does not form a closed polygon.";
+                    }
+
                     results.Add(new MatchResult
                     {
+                        MatchId = $"GT-M{matchCounter++:D6}",
+                        RunId = currentRunId,
                         SourceOid = srcOid,
                         TargetOidDisplay = "-",
                         TargetOid = null,
-                        OverlapPercentage = null,
-                        OverlapDisplay = "-",
-                        Status = MatchStatus.Failed,
-                        Details = "Invalid source geometry or geometry repair failed."
+                        OverlapPct = null,
+                        ThresholdPct = threshold,
+                        CandidateCount = 0,
+                        SecondBestOverlapPct = null,
+                        MatchStatus = MatchStatus.InvalidGeometry,
+                        TransferStatus = TransferStatus.Skipped,
+                        RunDate = DateTime.Now,
+                        SourceGeometryType = sourceGeometryType,
+                        ConversionStatus = isPolylineSource ? "Failed" : "None",
+                        WorkingPolygon = null,
+                        Details = failureDetail
                     });
                     continue;
                 }
 
                 if (ambiguousSources.Contains(srcOid))
                 {
-                    results.Add(ambiguousResults[srcOid]);
+                    var ambResult = ambiguousResults[srcOid];
+                    ambResult.SourceGeometryType = sourceGeometryType;
+                    ambResult.ConversionStatus = isPolylineSource ? "Converted" : "None";
+                    ambResult.WorkingPolygon = workingPoly;
+                    results.Add(ambResult);
                     continue;
                 }
 
@@ -137,19 +180,27 @@ namespace GeometryTransferTool.Services
 
                     results.Add(new MatchResult
                     {
+                        MatchId = $"GT-M{matchCounter++:D6}",
+                        RunId = currentRunId,
                         SourceOid = srcOid,
                         TargetOidDisplay = match.TargetOid.ToString(),
                         TargetOid = match.TargetOid,
-                        OverlapPercentage = match.OverlapPercentage,
-                        OverlapDisplay = $"{match.OverlapPercentage:F1}%",
-                        Status = MatchStatus.Transferred,
+                        OverlapPct = match.OverlapPercentage,
+                        ThresholdPct = threshold,
+                        CandidateCount = candidates.Count,
+                        SecondBestOverlapPct = secondBest,
+                        MatchStatus = MatchStatus.Matched,
+                        TransferStatus = TransferStatus.NotAttempted,
+                        RunDate = DateTime.Now,
+                        SourceGeometryType = sourceGeometryType,
+                        ConversionStatus = isPolylineSource ? "Converted" : "None",
+                        WorkingPolygon = workingPoly,
                         Details = details
                     });
                     continue;
                 }
 
-                // If not confirmed, determine whether it was a conflict (Target already claimed) or Below Threshold / No Match
-                var candidates = sourceCandidateMap.TryGetValue(srcOid, out var list) ? list : new List<MatchCandidate>();
+                // If not confirmed, determine whether it was a conflict (Target already claimed) or Below Threshold / No Intersection
                 var topCandidate = candidates.FirstOrDefault();
 
                 if (topCandidate != null && topCandidate.OverlapPercentage >= effectiveThreshold)
@@ -159,12 +210,21 @@ namespace GeometryTransferTool.Services
                     {
                         results.Add(new MatchResult
                         {
+                            MatchId = $"GT-M{matchCounter++:D6}",
+                            RunId = currentRunId,
                             SourceOid = srcOid,
                             TargetOidDisplay = topCandidate.TargetOid.ToString(),
                             TargetOid = null,
-                            OverlapPercentage = topCandidate.OverlapPercentage,
-                            OverlapDisplay = $"{topCandidate.OverlapPercentage:F1}%",
-                            Status = MatchStatus.TargetAlreadyMatched,
+                            OverlapPct = topCandidate.OverlapPercentage,
+                            ThresholdPct = threshold,
+                            CandidateCount = candidates.Count,
+                            SecondBestOverlapPct = secondBest,
+                            MatchStatus = MatchStatus.TargetAlreadyMatched,
+                            TransferStatus = TransferStatus.Skipped,
+                            RunDate = DateTime.Now,
+                            SourceGeometryType = sourceGeometryType,
+                            ConversionStatus = isPolylineSource ? "Converted" : "None",
+                            WorkingPolygon = workingPoly,
                             Details = $"Target {topCandidate.TargetOid} claimed by Source {winningMatch.SourceOid} ({winningMatch.OverlapPercentage:F1}% overlap)."
                         });
                         continue;
@@ -172,26 +232,51 @@ namespace GeometryTransferTool.Services
                 }
 
                 // Otherwise, below threshold or no intersection
-                double? bestOverlap = topCandidate?.OverlapPercentage;
-                string tgtDisplay = topCandidate != null ? topCandidate.TargetOid.ToString() : "-";
-                string overlapStr = bestOverlap.HasValue ? $"{bestOverlap.Value:F1}%" : "0.0%";
-
-                string belowDetails = ignoreThreshold
-                    ? "No intersecting target polygon found."
-                    : (bestOverlap.HasValue
-                        ? $"Best overlap ({bestOverlap.Value:F1}%) is below minimum threshold ({threshold:F1}%)."
-                        : "No intersecting target polygons found.");
-
-                results.Add(new MatchResult
+                if (topCandidate == null || topCandidate.OverlapPercentage <= 0.0)
                 {
-                    SourceOid = srcOid,
-                    TargetOidDisplay = tgtDisplay,
-                    TargetOid = null,
-                    OverlapPercentage = bestOverlap ?? 0.0,
-                    OverlapDisplay = overlapStr,
-                    Status = MatchStatus.BelowThreshold,
-                    Details = belowDetails
-                });
+                    results.Add(new MatchResult
+                    {
+                        MatchId = $"GT-M{matchCounter++:D6}",
+                        RunId = currentRunId,
+                        SourceOid = srcOid,
+                        TargetOidDisplay = "-",
+                        TargetOid = null,
+                        OverlapPct = 0.0,
+                        ThresholdPct = threshold,
+                        CandidateCount = 0,
+                        SecondBestOverlapPct = null,
+                        MatchStatus = MatchStatus.NoIntersection,
+                        TransferStatus = TransferStatus.Skipped,
+                        RunDate = DateTime.Now,
+                        SourceGeometryType = sourceGeometryType,
+                        ConversionStatus = isPolylineSource ? "Converted" : "None",
+                        WorkingPolygon = workingPoly,
+                        Details = "No intersecting target polygon found."
+                    });
+                }
+                else
+                {
+                    double bestOverlap = topCandidate.OverlapPercentage;
+                    results.Add(new MatchResult
+                    {
+                        MatchId = $"GT-M{matchCounter++:D6}",
+                        RunId = currentRunId,
+                        SourceOid = srcOid,
+                        TargetOidDisplay = topCandidate.TargetOid.ToString(),
+                        TargetOid = null,
+                        OverlapPct = bestOverlap,
+                        ThresholdPct = threshold,
+                        CandidateCount = candidates.Count,
+                        SecondBestOverlapPct = secondBest,
+                        MatchStatus = MatchStatus.BelowThreshold,
+                        TransferStatus = TransferStatus.Skipped,
+                        RunDate = DateTime.Now,
+                        SourceGeometryType = sourceGeometryType,
+                        ConversionStatus = isPolylineSource ? "Converted" : "None",
+                        WorkingPolygon = workingPoly,
+                        Details = $"Best overlap ({bestOverlap:F1}%) is below minimum threshold ({threshold:F1}%)."
+                    });
+                }
             }
 
             return results;

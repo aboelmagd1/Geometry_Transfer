@@ -24,7 +24,10 @@ namespace GeometryTransferTool.Services
             IReadOnlyList<MatchResult> matchResults,
             TransferSettings settings)
         {
-            var validMatches = matchResults.Where(r => r.CanTransfer).ToList();
+            var validMatches = matchResults.Where(r => r.CanTransfer &&
+                                                       r.MatchStatus != MatchStatus.Failed &&
+                                                       r.MatchStatus != MatchStatus.InvalidGeometry &&
+                                                       r.ConversionStatus != "Failed").ToList();
             if (validMatches.Count == 0)
             {
                 Logger.Warn("No confirmed matches to transfer.");
@@ -36,52 +39,83 @@ namespace GeometryTransferTool.Services
             return await QueuedTask.Run(() =>
             {
                 var sourceSr = sourceLayer.GetSpatialReference();
-                var targetSr = targetLayer.GetSpatialReference();
+                var targetSr = targetLayer.GetSpatialReference() ?? sourceSr ?? SpatialReferences.WebMercator;
                 var sourceOids = validMatches.Select(m => m.SourceOid).Distinct().ToList();
 
                 // Read source geometries and attributes into memory
                 var sourceShapes = new Dictionary<long, Geometry>();
                 var sourceAttributes = new Dictionary<long, Dictionary<string, object>>();
 
-                using (var srcTable = sourceLayer.GetTable())
+                // Reuse cached working polygon geometries from matching phase (§34 performance rule)
+                foreach (var match in validMatches)
                 {
-                    if (srcTable != null && sourceOids.Count > 0)
+                    if (match.WorkingPolygon != null && !match.WorkingPolygon.IsEmpty)
                     {
-                        var qf = new QueryFilter { ObjectIDs = sourceOids };
-                        using var cursor = srcTable.Search(qf);
-                        while (cursor.MoveNext())
+                        var poly = match.WorkingPolygon;
+                        if (targetSr != null && poly.SpatialReference != null && !SpatialReference.AreEqual(poly.SpatialReference, targetSr))
                         {
-                            using var feature = (Feature)cursor.Current;
-                            long oid = feature.GetObjectID();
-                            var shape = feature.GetShape();
-
-                            var preparedPoly = GeometryHelper.ValidateAndPreparePolygon(shape, targetSr, sourceSr);
-                            if (preparedPoly != null && !preparedPoly.IsEmpty)
+                            try
                             {
-                                sourceShapes[oid] = preparedPoly;
+                                poly = GeometryEngine.Instance.Project(poly, targetSr) as Polygon ?? poly;
                             }
-
-                            // Read mapped source attributes if attribute mapping is active
-                            if (settings.AttributeMappingEnabled && settings.AttributeMappings.Count > 0)
+                            catch (Exception prjEx)
                             {
-                                var rowMap = new Dictionary<string, object>();
-                                foreach (var map in settings.AttributeMappings.Where(m => m.IsEnabled && !string.IsNullOrWhiteSpace(m.SourceField) && !string.IsNullOrWhiteSpace(m.TargetField)))
+                                Logger.Warn($"Failed to project cached working polygon to target SR: {prjEx.Message}");
+                            }
+                        }
+                        sourceShapes[match.SourceOid] = poly;
+                    }
+                }
+
+                // If attributes need to be mapped OR any shapes were not in cache, query the source table
+                bool needQuerySource = (settings.AttributeMappingEnabled && settings.AttributeMappings.Count > 0) ||
+                                       sourceShapes.Count < sourceOids.Count;
+
+                if (needQuerySource)
+                {
+                    using (var srcTable = sourceLayer.GetTable())
+                    {
+                        if (srcTable != null && sourceOids.Count > 0)
+                        {
+                            var qf = new QueryFilter { ObjectIDs = sourceOids };
+                            using var cursor = srcTable.Search(qf);
+                            while (cursor.MoveNext())
+                            {
+                                using var feature = (Feature)cursor.Current;
+                                long oid = feature.GetObjectID();
+
+                                if (!sourceShapes.ContainsKey(oid))
                                 {
-                                    try
+                                    var shape = feature.GetShape();
+                                    var preparedPoly = GeometryHelper.ValidateAndPreparePolygon(shape, targetSr!, sourceSr);
+                                    if (preparedPoly != null && !preparedPoly.IsEmpty)
                                     {
-                                        int fldIdx = feature.FindField(map.SourceField);
-                                        if (fldIdx >= 0)
-                                        {
-                                            object val = feature[fldIdx];
-                                            rowMap[map.SourceField] = val;
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Logger.Warn($"Failed to read field '{map.SourceField}' for source OID {oid}: {ex.Message}");
+                                        sourceShapes[oid] = preparedPoly;
                                     }
                                 }
-                                sourceAttributes[oid] = rowMap;
+
+                                // Read mapped source attributes if attribute mapping is active
+                                if (settings.AttributeMappingEnabled && settings.AttributeMappings.Count > 0)
+                                {
+                                    var rowMap = new Dictionary<string, object>();
+                                    foreach (var map in settings.AttributeMappings.Where(m => m.IsEnabled && !string.IsNullOrWhiteSpace(m.SourceField) && !string.IsNullOrWhiteSpace(m.TargetField)))
+                                    {
+                                        try
+                                        {
+                                            int fldIdx = feature.FindField(map.SourceField);
+                                            if (fldIdx >= 0)
+                                            {
+                                                object val = feature[fldIdx];
+                                                rowMap[map.SourceField] = val;
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Logger.Warn($"Failed to read field '{map.SourceField}' for source OID {oid}: {ex.Message}");
+                                        }
+                                    }
+                                    sourceAttributes[oid] = rowMap;
+                                }
                             }
                         }
                     }
@@ -147,7 +181,33 @@ namespace GeometryTransferTool.Services
                 {
                     string errorMsg = editOp.ErrorMessage ?? "Unknown EditOperation failure.";
                     Logger.Error($"EditOperation failed: {errorMsg}");
+
+                    foreach (var match in validMatches)
+                    {
+                        match.TransferStatus = TransferStatus.Failed;
+                        match.Details = $"Transfer failed: {errorMsg}";
+                    }
+
                     throw new InvalidOperationException($"Geometry Transfer failed during execution: {errorMsg}");
+                }
+
+                // Update transfer statuses accurately (§13, §38)
+                foreach (var match in matchResults)
+                {
+                    if (match.TargetOid.HasValue && transferredTargetOids.Contains(match.TargetOid.Value))
+                    {
+                        match.TransferStatus = TransferStatus.Success;
+                        match.Details = $"Transferred successfully at {DateTime.Now:HH:mm:ss}.";
+                    }
+                    else if (match.MatchStatus == MatchStatus.Matched)
+                    {
+                        match.TransferStatus = TransferStatus.Failed;
+                        match.Details = "Transfer skipped or geometry could not be prepared.";
+                    }
+                    else
+                    {
+                        match.TransferStatus = TransferStatus.Skipped;
+                    }
                 }
 
                 Logger.Info($"Successfully transferred geometry for {transferredTargetOids.Count} target features.");

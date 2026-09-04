@@ -117,50 +117,105 @@
                 <Setter Property="FontSize" Value="11" />
             </Style>
 
-            <!-- Status Badge Template (Optimized for High Visibility) -->
+            <!-- Match Status Badge Template -->
             <DataTemplate x:Key="StatusCellTemplate" DataType="{x:Type models:MatchResult}">
                 <Border CornerRadius="3" Padding="6,2" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Background" Value="#2A2A2A" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Status}" Value="Transferred">
+                                <DataTrigger Binding="{Binding MatchStatus}" Value="Matched">
                                     <Setter Property="Background" Value="#1B4D2E" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding Status}" Value="BelowThreshold">
+                                <DataTrigger Binding="{Binding MatchStatus}" Value="BelowThreshold">
                                     <Setter Property="Background" Value="#593400" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding Status}" Value="Ambiguous">
+                                <DataTrigger Binding="{Binding MatchStatus}" Value="Ambiguous">
                                     <Setter Property="Background" Value="#541B38" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding Status}" Value="TargetAlreadyMatched">
+                                <DataTrigger Binding="{Binding MatchStatus}" Value="TargetAlreadyMatched">
                                     <Setter Property="Background" Value="#3B1E54" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding Status}" Value="Failed">
+                                <DataTrigger Binding="{Binding MatchStatus}" Value="NoIntersection">
+                                    <Setter Property="Background" Value="#2A3441" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding MatchStatus}" Value="InvalidGeometry">
+                                    <Setter Property="Background" Value="#5C1D1D" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding MatchStatus}" Value="Failed">
                                     <Setter Property="Background" Value="#5C1D1D" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <TextBlock Text="{Binding StatusDisplay}" FontSize="10.5" FontWeight="SemiBold">
+                    <TextBlock Text="{Binding StatusDisplay}" FontSize="10" FontWeight="SemiBold">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="#E0E0E0" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Status}" Value="Transferred">
+                                    <DataTrigger Binding="{Binding MatchStatus}" Value="Matched">
                                         <Setter Property="Foreground" Value="#66BB6A" />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding Status}" Value="BelowThreshold">
+                                    <DataTrigger Binding="{Binding MatchStatus}" Value="BelowThreshold">
                                         <Setter Property="Foreground" Value="#FFA726" />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding Status}" Value="Ambiguous">
+                                    <DataTrigger Binding="{Binding MatchStatus}" Value="Ambiguous">
                                         <Setter Property="Foreground" Value="#F06292" />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding Status}" Value="TargetAlreadyMatched">
+                                    <DataTrigger Binding="{Binding MatchStatus}" Value="TargetAlreadyMatched">
                                         <Setter Property="Foreground" Value="#BA68C8" />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding Status}" Value="Failed">
+                                    <DataTrigger Binding="{Binding MatchStatus}" Value="NoIntersection">
+                                        <Setter Property="Foreground" Value="#94A3B8" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding MatchStatus}" Value="InvalidGeometry">
                                         <Setter Property="Foreground" Value="#EF5350" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding MatchStatus}" Value="Failed">
+                                        <Setter Property="Foreground" Value="#EF5350" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
+            </DataTemplate>
+
+            <!-- Transfer Status Badge Template -->
+            <DataTemplate x:Key="TransferStatusCellTemplate" DataType="{x:Type models:MatchResult}">
+                <Border CornerRadius="3" Padding="5,2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="#252526" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding TransferStatus}" Value="Success">
+                                    <Setter Property="Background" Value="#1B4D2E" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding TransferStatus}" Value="Failed">
+                                    <Setter Property="Background" Value="#5C1D1D" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding TransferStatus}" Value="NotAttempted">
+                                    <Setter Property="Background" Value="#2A3441" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding TransferStatus}" Value="Skipped">
+                                    <Setter Property="Background" Value="#252526" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="{Binding TransferStatusDisplay}" FontSize="9.5" FontWeight="SemiBold">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#94A3B8" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding TransferStatus}" Value="Success">
+                                        <Setter Property="Foreground" Value="#4CAF50" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding TransferStatus}" Value="Failed">
+                                        <Setter Property="Foreground" Value="#EF5350" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding TransferStatus}" Value="NotAttempted">
+                                        <Setter Property="Foreground" Value="#64748B" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -213,17 +268,38 @@
                 <!-- 1. Layer Selection Card -->
                 <Border Style="{StaticResource SectionCardStyle}">
                     <StackPanel>
-                        <TextBlock Text="1. LAYER SELECTION (1–60 Features)" Style="{StaticResource SectionHeaderStyle}" />
+                        <TextBlock Text="1. LAYER SELECTION (Up to 60 Polygons / 400 Lines)" Style="{StaticResource SectionHeaderStyle}" />
 
-                        <!-- Source Layer -->
-                        <TextBlock Text="Source / Drawing Layer:" Style="{StaticResource FieldLabelStyle}" />
-                        <ComboBox ItemsSource="{Binding Layers}" SelectedItem="{Binding SelectedSourceLayerItem}" DisplayMemberPath="DisplayText" Height="26" Margin="0,0,0,8" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" />
+                        <!-- Source Layer (Polygon or Polyline) -->
+                        <TextBlock Text="Source / Drawing Layer (Polygon or Polyline):" Style="{StaticResource FieldLabelStyle}" />
+                        <ComboBox ItemsSource="{Binding SourceLayers}" SelectedItem="{Binding SelectedSourceLayerItem}" DisplayMemberPath="DisplayText" Height="26" Margin="0,0,0,8" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" />
 
-                        <!-- Target Layer -->
-                        <TextBlock Text="Target / Master Layer:" Style="{StaticResource FieldLabelStyle}" />
-                        <ComboBox ItemsSource="{Binding Layers}" SelectedItem="{Binding SelectedTargetLayerItem}" DisplayMemberPath="DisplayText" Height="26" Margin="0,0,0,4" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" />
+                        <!-- Target Layer (Polygon only) -->
+                        <TextBlock Text="Target / Master Layer (Polygon only):" Style="{StaticResource FieldLabelStyle}" />
+                        <ComboBox ItemsSource="{Binding TargetLayers}" SelectedItem="{Binding SelectedTargetLayerItem}" DisplayMemberPath="DisplayText" Height="26" Margin="0,0,0,4" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" />
 
-                        <TextBlock Text="Select 1 to 60 polygon features in each layer on the map." Style="{StaticResource SubTextStyle}" Margin="0,4,0,0" />
+                        <TextBlock Text="Select up to 60 polygons or 400 lines in Source, and up to 60 polygons in Target." Style="{StaticResource SubTextStyle}" Margin="0,4,0,0" />
+
+                        <!-- 🛡️ Safety Banner (§3) -->
+                        <Border Background="#1B3320" BorderBrush="#2E7D32" BorderThickness="1" CornerRadius="4" Padding="7,5" Margin="0,8,0,0">
+                            <TextBlock Text="🛡️ Drawing Layer is strictly read-only. The Source Layer will never be modified." FontSize="10.5" Foreground="#81C784" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        </Border>
+
+                        <!-- 🌐 HTTP/Web Service Safeguard (From & To) -->
+                        <StackPanel Margin="0,8,0,0">
+                            <!-- Warning Banner if HTTP Service is detected in Source or Target -->
+                            <Border Visibility="{Binding IsWebServiceDetected, Converter={StaticResource BoolToVisConverter}}" Background="#2E1B11" BorderBrush="#FF9800" BorderThickness="1" CornerRadius="4" Padding="7,6" Margin="0,0,0,6">
+                                <StackPanel>
+                                    <TextBlock Text="⚠️ Web Service Layer Detected (From / To)" FontWeight="Bold" FontSize="11" Foreground="#FFA726" />
+                                    <TextBlock Text="Transfer is currently blocked. Enable the safeguard checkbox below only if you intentionally want to transfer geometry from or to an HTTP web service." Style="{StaticResource SubTextStyle}" Foreground="#FFCC80" Margin="0,2,0,0" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <CheckBox IsChecked="{Binding AllowWebServiceTransfer}" Margin="0,2,0,0">
+                                <TextBlock Text="Allow Transfer to / from Web Service (HTTP Source or Target)" Foreground="{StaticResource TextWhite}" FontWeight="SemiBold" FontSize="11" TextWrapping="Wrap" />
+                            </CheckBox>
+                            <TextBlock Text="For safety, geometry transfer involving HTTP/HTTPS web services (From or To) is blocked by default." Style="{StaticResource SubTextStyle}" Margin="20,2,0,0" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
@@ -312,10 +388,61 @@
                     </StackPanel>
                 </Border>
 
-                <!-- 4. Execution Controls Card -->
+                <!-- 4. Results & Reporting Card (§19, §20, §25) -->
                 <Border Style="{StaticResource SectionCardStyle}">
                     <StackPanel>
-                        <TextBlock Text="3. EXECUTION CONTROLS" Style="{StaticResource SectionHeaderStyle}" />
+                        <TextBlock Text="4. RESULTS &amp; REPORTING" Style="{StaticResource SectionHeaderStyle}" />
+
+                        <!-- Results Table Checkbox -->
+                        <CheckBox IsChecked="{Binding CreateResultsTable}" Margin="0,0,0,6">
+                            <TextBlock Text="Create Results Table in Geodatabase" Foreground="{StaticResource TextWhite}" FontWeight="SemiBold" FontSize="11" />
+                        </CheckBox>
+
+                        <!-- Results Feature Class Checkbox (§20) -->
+                        <CheckBox IsChecked="{Binding CreateResultsFeatureClass}" Margin="0,0,0,8">
+                            <TextBlock Text="Create Results Feature Class in Geodatabase" Foreground="{StaticResource TextWhite}" FontWeight="SemiBold" FontSize="11" />
+                        </CheckBox>
+
+                        <StackPanel Margin="0,2,0,0">
+                            <!-- Output Location Picker (§25) -->
+                            <TextBlock Text="Output Location:" Style="{StaticResource FieldLabelStyle}" />
+                            <ComboBox ItemsSource="{Binding OutputLocationOptions}" SelectedItem="{Binding SelectedOutputLocationOption}" Height="25" Margin="0,0,0,6" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" />
+
+                            <!-- Custom GDB Path input if selected -->
+                            <StackPanel Visibility="{Binding IsCustomGdbSelected, Converter={StaticResource BoolToVisConverter}}" Margin="0,0,0,6">
+                                <TextBlock Text="Custom Geodatabase Path:" Style="{StaticResource FieldLabelStyle}" />
+                                <TextBox Text="{Binding CustomGdbPath, UpdateSourceTrigger=PropertyChanged}" Height="24" Background="{StaticResource InputBackground}" Foreground="{StaticResource TextWhite}" BorderBrush="{StaticResource InputBorder}" VerticalContentAlignment="Center" Padding="4,0" />
+                            </StackPanel>
+
+                            <!-- Dynamic Attribute Snapshot Checkbox (§20) -->
+                            <CheckBox IsChecked="{Binding IncludeAttributeSnapshot}" Visibility="{Binding CreateResultsTable, Converter={StaticResource BoolToVisConverter}}" Margin="0,4,0,4">
+                                <TextBlock Text="Include Dynamic Attribute Snapshot Table" Foreground="{StaticResource TextWhite}" FontSize="11" />
+                            </CheckBox>
+
+                            <StackPanel Visibility="{Binding IncludeAttributeSnapshot, Converter={StaticResource BoolToVisConverter}}" Margin="8,2,0,4">
+                                <TextBlock Text="Select source fields to snapshot (generic):" Style="{StaticResource SubTextStyle}" Margin="0,0,0,4" />
+                                <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="3" Padding="4" MaxHeight="90">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl ItemsSource="{Binding DynamicSourceFields}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox IsChecked="{Binding IsSelected}" Margin="2,1,2,2">
+                                                        <TextBlock Text="{Binding DisplayText}" FontSize="10.5" Foreground="{StaticResource TextLight}" />
+                                                    </CheckBox>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- 5. Execution Controls Card -->
+                <Border Style="{StaticResource SectionCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="5. EXECUTION CONTROLS" Style="{StaticResource SectionHeaderStyle}" />
 
                         <CheckBox IsChecked="{Binding SkipPreview}" Margin="0,0,0,8">
                             <TextBlock Text="Skip preview and transfer immediately" Foreground="{StaticResource TextWhite}" FontSize="11" />
@@ -328,13 +455,25 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <Button Grid.Column="0" Content="1. Preview Matches" Command="{Binding PreviewMatchesCommand}" Background="{StaticResource SecondaryButtonBg}" BorderBrush="{StaticResource SecondaryButtonBorder}" Foreground="{StaticResource TextWhite}" Height="34" FontWeight="SemiBold" FontSize="11.5" />
-                            <Button Grid.Column="2" Content="2. Confirm &amp; Transfer" Command="{Binding ConfirmTransferCommand}" Background="{StaticResource PrimaryActionBlue}" BorderThickness="0" Foreground="{StaticResource TextWhite}" Height="34" FontWeight="Bold" FontSize="11.5" />
+                            <Button Grid.Column="0" Content="1. Preview Matches" Command="{Binding PreviewMatchesCommand}" Background="{StaticResource SecondaryButtonBg}" BorderBrush="{StaticResource SecondaryButtonBorder}" Foreground="{StaticResource TextWhite}" Height="34" FontWeight="SemiBold" FontSize="11" />
+                            <Button Grid.Column="2" Content="2. Confirm &amp; Transfer" Command="{Binding ConfirmTransferCommand}" Background="{StaticResource PrimaryActionBlue}" BorderThickness="0" Foreground="{StaticResource TextWhite}" Height="34" FontWeight="Bold" FontSize="11" />
+                        </Grid>
+
+                        <!-- Standalone Results Generation Buttons (§21, §36) -->
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" Content="📝 Results Table" Command="{Binding CreateResultsTableCommand}" Background="{StaticResource SecondaryButtonBg}" BorderBrush="{StaticResource SecondaryButtonBorder}" Foreground="{StaticResource AccentBlue}" Height="32" FontWeight="SemiBold" FontSize="11" ToolTip="Create standalone Results Table in Geodatabase from current match results." />
+                            <Button Grid.Column="2" Content="🗺️ Results Feature Class" Command="{Binding CreateResultsFeatureClassCommand}" Background="{StaticResource SecondaryButtonBg}" BorderBrush="{StaticResource SecondaryButtonBorder}" Foreground="#81C784" Height="32" FontWeight="SemiBold" FontSize="11" ToolTip="Create polygon Results Feature Class in Geodatabase from current match results." />
                         </Grid>
                     </StackPanel>
                 </Border>
 
-                <!-- 5. Summary KPI Cards -->
+                <!-- 6. Summary KPI Cards -->
                 <Border Visibility="{Binding HasSummary, Converter={StaticResource BoolToVisConverter}}" Style="{StaticResource SectionCardStyle}">
                     <StackPanel>
                         <TextBlock Text="MATCHING SUMMARY" Style="{StaticResource SectionHeaderStyle}" />
@@ -342,42 +481,48 @@
                         <UniformGrid Columns="3" Margin="0,0,0,4">
                             <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
                                 <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="{Binding Summary.MatchedCount}" FontWeight="Bold" FontSize="17" Foreground="#4CAF50" HorizontalAlignment="Center" />
-                                    <TextBlock Text="Ready / Matched" FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding Summary.MatchedCount}" FontWeight="Bold" FontSize="16" Foreground="#4CAF50" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Matched" FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                             <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
                                 <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="{Binding Summary.BelowThresholdCount}" FontWeight="Bold" FontSize="17" Foreground="#FFA726" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding Summary.BelowThresholdCount}" FontWeight="Bold" FontSize="16" Foreground="#FFA726" HorizontalAlignment="Center" />
                                     <TextBlock Text="Below Thresh." FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                             <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
                                 <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="{Binding Summary.AmbiguousCount}" FontWeight="Bold" FontSize="17" Foreground="#F06292" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding Summary.AmbiguousCount}" FontWeight="Bold" FontSize="16" Foreground="#F06292" HorizontalAlignment="Center" />
                                     <TextBlock Text="Ambiguous" FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                         </UniformGrid>
 
-                        <UniformGrid Columns="2">
+                        <UniformGrid Columns="3">
                             <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
                                 <StackPanel HorizontalAlignment="Center">
                                     <TextBlock Text="{Binding Summary.TargetAlreadyMatchedCount}" FontWeight="Bold" FontSize="14" Foreground="#BA68C8" HorizontalAlignment="Center" />
-                                    <TextBlock Text="Conflict (Claimed)" FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Conflict (Claimed)" FontSize="9" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Summary.NoIntersectionCount}" FontWeight="Bold" FontSize="14" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                                    <TextBlock Text="No Match" FontSize="9" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                             <Border Background="{StaticResource InputBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="2">
                                 <StackPanel HorizontalAlignment="Center">
                                     <TextBlock Text="{Binding Summary.FailedCount}" FontWeight="Bold" FontSize="14" Foreground="#EF5350" HorizontalAlignment="Center" />
-                                    <TextBlock Text="Failed / Errors" FontSize="9.5" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Failed / Error" FontSize="9" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
                         </UniformGrid>
                     </StackPanel>
                 </Border>
 
-                <!-- 6. Detailed Results Table Card (With Zoom & Flash on Selection) -->
+                <!-- 7. Detailed Results Table Card (With Zoom & Flash on Selection) -->
                 <Border Style="{StaticResource SectionCardStyle}">
                     <StackPanel>
                         <Grid Margin="0,0,0,8">
@@ -386,7 +531,7 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="4. DETAILED RESULTS TABLE" Style="{StaticResource SectionHeaderStyle}" Margin="0" />
+                                <TextBlock Text="6. DETAILED RESULTS TABLE" Style="{StaticResource SectionHeaderStyle}" Margin="0" />
                                 <TextBlock Text="Click any row to zoom &amp; highlight feature on map." FontSize="9.5" Foreground="{StaticResource TextMuted}" Margin="0,1,0,0" />
                             </StackPanel>
                             <Button Grid.Column="1" Content="Clear" Command="{Binding ClearResultsCommand}" Background="{StaticResource SecondaryButtonBg}" BorderBrush="{StaticResource SecondaryButtonBorder}" Foreground="{StaticResource TextWhite}" Padding="10,2" Height="22" FontSize="10.5" VerticalAlignment="Center" />
@@ -412,10 +557,13 @@
                                   SelectionMode="Single"
                                   SelectionUnit="FullRow">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Source" Binding="{Binding SourceOid}" Width="55" FontWeight="Bold" ElementStyle="{StaticResource DataGridTextElementStyle}" />
-                                <DataGridTextColumn Header="Target" Binding="{Binding TargetOidDisplay}" Width="55" ElementStyle="{StaticResource DataGridTextElementStyle}" />
-                                <DataGridTextColumn Header="Overlap" Binding="{Binding OverlapDisplay}" Width="60" ElementStyle="{StaticResource DataGridTextElementStyle}" />
-                                <DataGridTemplateColumn Header="Status" CellTemplate="{StaticResource StatusCellTemplate}" Width="120" />
+                                <DataGridTextColumn Header="Match ID" Binding="{Binding MatchId}" Width="75" FontWeight="SemiBold" ElementStyle="{StaticResource DataGridTextElementStyle}" />
+                                <DataGridTextColumn Header="Src" Binding="{Binding SourceOid}" Width="45" FontWeight="Bold" ElementStyle="{StaticResource DataGridTextElementStyle}" />
+                                <DataGridTextColumn Header="Type" Binding="{Binding SourceGeometryType}" Width="52" ElementStyle="{StaticResource DataGridTextElementStyle}" />
+                                <DataGridTextColumn Header="Tgt" Binding="{Binding TargetOidDisplay}" Width="45" ElementStyle="{StaticResource DataGridTextElementStyle}" />
+                                <DataGridTextColumn Header="Overlap" Binding="{Binding OverlapDisplay}" Width="55" ElementStyle="{StaticResource DataGridTextElementStyle}" />
+                                <DataGridTemplateColumn Header="Match Status" CellTemplate="{StaticResource StatusCellTemplate}" Width="105" />
+                                <DataGridTemplateColumn Header="Transfer" CellTemplate="{StaticResource TransferStatusCellTemplate}" Width="85" />
                                 <DataGridTextColumn Header="Details / Rationale" Binding="{Binding Details}" Width="*" ElementStyle="{StaticResource DataGridTextElementStyle}" />
                             </DataGrid.Columns>
                         </DataGrid>

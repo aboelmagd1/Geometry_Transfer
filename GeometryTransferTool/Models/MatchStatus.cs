@@ -1,17 +1,17 @@
 namespace GeometryTransferTool.Models
 {
     /// <summary>
-    /// Status representing the outcome of polygon matching and geometry transfer.
+    /// Status representing the outcome of polygon matching (§11).
     /// </summary>
     public enum MatchStatus
     {
         /// <summary>
-        /// Successfully matched and ready to transfer (during Preview) or already transferred (after Transfer).
+        /// Successfully matched and accepted for geometry transfer.
         /// </summary>
-        Transferred,
+        Matched,
 
         /// <summary>
-        /// Best candidate overlap is below the minimum threshold.
+        /// Best candidate overlap is below the minimum configured threshold.
         /// </summary>
         BelowThreshold,
 
@@ -21,13 +21,28 @@ namespace GeometryTransferTool.Models
         Ambiguous,
 
         /// <summary>
-        /// The candidate target was claimed by another source with a higher overlap percentage.
+        /// No intersecting target polygon was found.
+        /// </summary>
+        NoIntersection,
+
+        /// <summary>
+        /// The candidate target was claimed by another source polygon with a higher overlap percentage.
         /// </summary>
         TargetAlreadyMatched,
 
         /// <summary>
-        /// Processing failed due to invalid geometry, repair failure, or an execution error.
+        /// Source or candidate target feature contains empty or invalid polygon geometry.
         /// </summary>
-        Failed
+        InvalidGeometry,
+
+        /// <summary>
+        /// Matching or spatial evaluation failed.
+        /// </summary>
+        Failed,
+
+        /// <summary>
+        /// Feature processing was skipped.
+        /// </summary>
+        Skipped
     }
 }

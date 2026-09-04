@@ -43,6 +43,51 @@ namespace GeometryTransferTool.Models
         public ObservableCollection<AttributeMappingItem> AttributeMappings { get; set; } = new();
 
         /// <summary>
+        /// Safety safeguard: Allow geometry transfer when Source or Target layer is an HTTP/Web Feature Service (From / To).
+        /// Default is false (blocked).
+        /// </summary>
+        public bool AllowWebServiceTransfer { get; set; } = false;
+
+        /// <summary>
+        /// Backward-compatibility alias for AllowWebServiceTransfer.
+        /// </summary>
+        public bool AllowWebServiceSourceTransfer
+        {
+            get => AllowWebServiceTransfer;
+            set => AllowWebServiceTransfer = value;
+        }
+
+        /// <summary>
+        /// Whether to automatically create Results Table upon Transfer (§25, §40). Default true.
+        /// </summary>
+        public bool CreateResultsTable { get; set; } = true;
+
+        /// <summary>
+        /// Whether to automatically create polygon Results Feature Class upon Transfer. Default false.
+        /// </summary>
+        public bool CreateResultsFeatureClass { get; set; } = false;
+
+        /// <summary>
+        /// Output Location choice: "ProjectDefaultGdb", "TargetWorkspace", "CustomGdb" (§25).
+        /// </summary>
+        public string OutputLocationType { get; set; } = "ProjectDefaultGdb";
+
+        /// <summary>
+        /// Custom geodatabase path when OutputLocationType is CustomGdb.
+        /// </summary>
+        public string CustomGdbPath { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Whether to create a dynamic attribute snapshot table (§20). Default false.
+        /// </summary>
+        public bool IncludeAttributeSnapshot { get; set; } = false;
+
+        /// <summary>
+        /// Dynamic fields selected from Source Layer to snapshot.
+        /// </summary>
+        public List<string> SelectedSnapshotFields { get; set; } = new();
+
+        /// <summary>
         /// Whether to immediately execute transfer upon clicking Run. Default false.
         /// </summary>
         public bool SkipPreview { get; set; } = false;

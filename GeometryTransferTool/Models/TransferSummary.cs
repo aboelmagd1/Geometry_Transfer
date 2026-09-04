@@ -11,14 +11,15 @@ namespace GeometryTransferTool.Models
         public int BelowThresholdCount { get; set; }
         public int AmbiguousCount { get; set; }
         public int TargetAlreadyMatchedCount { get; set; }
+        public int NoIntersectionCount { get; set; }
         public int FailedCount { get; set; }
 
         public bool HasMatches => MatchedCount > 0;
-        public bool HasIssues => BelowThresholdCount > 0 || AmbiguousCount > 0 || TargetAlreadyMatchedCount > 0 || FailedCount > 0;
+        public bool HasIssues => BelowThresholdCount > 0 || AmbiguousCount > 0 || TargetAlreadyMatchedCount > 0 || NoIntersectionCount > 0 || FailedCount > 0;
 
         public override string ToString()
         {
-            return $"Source: {TotalSourceFeatures}, Target: {TotalTargetFeatures} | Matched: {MatchedCount}, Below Threshold: {BelowThresholdCount}, Ambiguous: {AmbiguousCount}, Conflict: {TargetAlreadyMatchedCount}, Failed: {FailedCount}";
+            return $"Source: {TotalSourceFeatures}, Target: {TotalTargetFeatures} | Matched: {MatchedCount}, Below Threshold: {BelowThresholdCount}, Ambiguous: {AmbiguousCount}, Conflict: {TargetAlreadyMatchedCount}, No Match: {NoIntersectionCount}, Failed: {FailedCount}";
         }
     }
 }
